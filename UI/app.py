@@ -1,0 +1,213 @@
+import os
+import streamlit as st
+import pandas as pd
+import joblib
+
+
+# ---------------------------------------------------------
+# Page configuration
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="Credit Card Prediction",
+    page_icon="💳",
+    layout="centered"
+)
+
+
+# ---------------------------------------------------------
+# Load trained model
+# ---------------------------------------------------------
+# Build the model path relative to this script's own location,
+# rather than the current working directory. This way the app
+# works the same whether it's run from Spyder, VS Code, a
+# terminal in a different folder, or Streamlit Community Cloud.
+MODEL_FILENAME = "logistic_regression_model.pkl"
+# app.py lives in UI/, and the model lives in ../model/ relative to it
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(APP_DIR, "..", "model", MODEL_FILENAME)
+
+
+@st.cache_resource
+def load_model():
+    if not os.path.exists(MODEL_PATH):
+        st.error(
+            f"Model file not found: `{MODEL_FILENAME}`.\n\n"
+            "Make sure this file is committed to the same folder as `app.py` "
+            "in your GitHub repository."
+        )
+        st.stop()
+
+    try:
+        return joblib.load(MODEL_PATH)
+    except Exception as e:
+        st.error(
+            "The model file couldn't be loaded. This usually means the "
+            "scikit-learn version installed here doesn't match the version "
+            "used to train the model. Check `requirements.txt` and pin "
+            "scikit-learn to match.\n\n"
+            f"Details: {e}"
+        )
+        st.stop()
+
+
+model = load_model()
+
+
+# ---------------------------------------------------------
+# Title
+# ---------------------------------------------------------
+st.title("💳 Credit Card Prediction")
+
+st.write(
+    "Enter the customer information below to predict "
+    "the likelihood of being a credit card holder."
+)
+
+
+# ---------------------------------------------------------
+# Customer inputs
+# ---------------------------------------------------------
+
+st.subheader("Customer Information")
+
+
+retirement_balance = st.number_input(
+    "Retirement Balance ($)",
+    min_value=0.0,
+    value=0.0,
+    step=100.0
+)
+
+
+brokerage_balance = st.number_input(
+    "Brokerage Balance ($)",
+    min_value=0.0,
+    value=0.0,
+    step=100.0
+)
+
+
+credit_utilization_percent = st.number_input(
+    "Credit Utilization (%)",
+    min_value=0.0,
+    max_value=100.0,
+    value=30.0,
+    step=1.0
+)
+
+
+autopay_enrolled = st.selectbox(
+    "Autopay Enrolled",
+    ["Yes", "No"]
+)
+
+
+overdraft_count = st.number_input(
+    "Overdrafts (12 months)",
+    min_value=0,
+    value=0,
+    step=1
+)
+
+
+age = st.number_input(
+    "Age",
+    min_value=18,
+    max_value=100,
+    value=40,
+    step=1
+)
+
+
+risk_tier = st.selectbox(
+    "Risk Tier",
+    ["Prime Plus", "Prime", "Other"]
+)
+
+
+delinquency_90d_count = st.number_input(
+    "90-Day Delinquencies",
+    min_value=0,
+    value=0,
+    step=1
+)
+
+
+# ---------------------------------------------------------
+# Prediction
+# ---------------------------------------------------------
+
+st.divider()
+
+
+if st.button("🔮 Predict", type="primary"):
+
+    # Convert Streamlit inputs to model variables
+
+    autopay_flag = 1 if autopay_enrolled == "Yes" else 0
+
+    # Convert percentage to ratio
+    credit_utilization_ratio = credit_utilization_percent / 100
+
+
+    # One-hot encoding for risk tier
+    risk_tier_prime_plus = 1 if risk_tier == "Prime Plus" else 0
+    risk_tier_prime = 1 if risk_tier == "Prime" else 0
+
+
+    # Create input dataframe
+    input_data = pd.DataFrame({
+        "retirement_balance": [retirement_balance],
+        "brokerage_balance": [brokerage_balance],
+        "credit_utilization_ratio": [credit_utilization_ratio],
+        "autopay_enrolled_flag": [autopay_flag],
+        "overdraft_count_12mo": [overdraft_count],
+        "age": [age],
+        "risk_tier_Prime Plus": [risk_tier_prime_plus],
+        "risk_tier_Prime": [risk_tier_prime],
+        "delinquency_90d_count": [delinquency_90d_count]
+    })
+
+
+    # Make prediction
+    probability = model.predict_proba(input_data)[0, 1]
+
+    prediction = model.predict(input_data)[0]
+
+
+    # -----------------------------------------------------
+    # Display results
+    # -----------------------------------------------------
+
+    st.subheader("Prediction Result")
+
+
+    probability_percent = probability * 100
+
+    st.metric(
+        "Prediction Probability",
+        f"{probability_percent:.1f}%"
+    )
+
+
+    if prediction == 1:
+
+        st.success(
+            "🟢 Likely Credit Card Holder"
+        )
+
+    else:
+
+        st.warning(
+            "🔴 Unlikely Credit Card Holder"
+        )
+
+
+    # Show probability bar
+    st.progress(float(probability))
+
+
+    # Show technical details
+    with st.expander("View model inputs"):
+
+        st.dataframe(input_data)

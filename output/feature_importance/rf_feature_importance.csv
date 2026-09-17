@@ -1,0 +1,10 @@
+feature,importance,rank
+retirement_balance,0.254047,1
+annual_income,0.1432,2
+total_products_owned,0.133409,3
+credit_score,0.112299,4
+credit_utilization_ratio,0.108704,5
+brokerage_balance,0.100333,6
+debt_to_income_ratio,0.07026,7
+age,0.046203,8
+avg_transaction_amount,0.031545,9

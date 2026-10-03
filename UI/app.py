@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-
+from output_and_scoring import render_output_browser, render_scoring
 # ---------------------------------------------------------
 # Page configuration
 # ---------------------------------------------------------
@@ -67,7 +67,20 @@ st.title("💳 Credit Card Prediction")
 # ---------------------------------------------------------
 # Tabs
 # ---------------------------------------------------------
-tab_predict, tab_explore = st.tabs(["🔮 Prediction", "📊 Data Exploration"])
+tab1, tab2, tab3, tab4, tab_outputs, tab_scoring = st.tabs([
+    "Data Exploration",
+    "Logistic Regression",
+    "Random Forest",
+    "Model Comparison",
+    "Model Outputs",
+    "Score New File",
+])
+
+
+
+#tab_predict, tab_explore, tab_outputs, tab_scoring = st.tabs(
+ #   ["🔮 Prediction", "📊 Data Exploration", "📁 Model Outputs", "🆕 Score New File"]
+#)
 
 
 with tab_predict:
@@ -76,8 +89,18 @@ with tab_predict:
         "Enter the customer information below to predict "
         "the likelihood of being a credit card holder."
     )
+    with tab_outputs:
+    render_output_browser()
 
+    with tab_scoring:
+         render_scoring()
 
+    with tab_outputs:
+         render_output_browser()
+
+    with tab_scoring:
+    render_scoring()
+    
     # -------------------------------------------------------
     # Customer inputs
     # -------------------------------------------------------
@@ -244,3 +267,9 @@ with tab_explore:
             except Exception as e:
                 st.error(f"Couldn't read `{filename}`: {e}")
             st.divider()
+
+            with tab_outputs:
+                 render_output_browser()
+
+            with tab_scoring:
+                 render_scoring()

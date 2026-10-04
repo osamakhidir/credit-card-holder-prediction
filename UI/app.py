@@ -90,7 +90,7 @@ with tab_predict:
         "the likelihood of being a credit card holder."
     )
     with tab_outputs:
-    render_output_browser()
+         render_output_browser()
 
     with tab_scoring:
          render_scoring()
@@ -99,7 +99,7 @@ with tab_predict:
          render_output_browser()
 
     with tab_scoring:
-    render_scoring()
+         render_scoring()
     
     # -------------------------------------------------------
     # Customer inputs

@@ -25,11 +25,14 @@ OUTPUT_DIR = os.path.join(PROJECT_DIR, "output")
 MODEL_DIR = os.path.join(PROJECT_DIR, "model")
 
 # Label shown in the drop-down  ->  folder name inside output/
+# NOTE: update "Correlation Output" once you confirm where
+# Correlation_Crosstab.py actually saves its files.
 OUTPUT_FOLDERS = {
     "Feature Importance": "feature_importance",
-    "Lift Table": "lift_table",
-    "Plots and Data Exploration": "plots and data exploration",
-    "Correlation Output": "correlation output",
+    "Lift Tables": "lift_tables",
+    "Plots": "plots",
+    "Predictions": "predictions",
+    "Correlation Output": "correlation_output",  # <-- confirm/fix this path
 }
 
 TARGET = "credit_card_holder_flag"
